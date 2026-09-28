@@ -1,5 +1,5 @@
 {
-  "source": "darkpool-v2 packages/wallets/src/discovery/codec.ts (offsets and field encoding)",
+  "source": "Howl packages/wallets/src/discovery/codec.ts (offsets and field encoding)",
   "record_bytes": 246,
   "cell_bytes": 256,
   "commitment_prefix_bytes": 16,

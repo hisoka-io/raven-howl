@@ -1,16 +1,12 @@
 //! Poseidon2 over the BN254 scalar field, byte-identical to Aztec's `poseidon2Hash`.
 //!
-//! This is the hash Howl's discovery layer commits to. Its generator is a thin wrapper over
-//! `poseidon2Hash` from `@aztec/foundation/crypto`, so the parameterisation to match is
-//! Aztec's, not a Howl-local one.
+//! This is the hash Howl's discovery layer commits to. Howl calls `poseidon2Hash` from
+//! `@aztec/foundation/crypto`, so the parameterisation matched here is Aztec's. It is not
+//! Poseidon-BN254 (as implemented by `light-poseidon`), which is a different hash.
 //!
-//! Not to be confused with `raven-railgun-poseidon`, which wraps `light-poseidon` and is
-//! Poseidon-BN254: a different hash for a different protocol's parity.
-//!
-//! Every constant and both linear layers are transcribed from a cited implementation and
-//! pinned against Barretenberg's own permutation by the vectors in `tests/`. Nothing here was
-//! derived from memory, because the canonical constants live in a WASM blob and a compiler
-//! intrinsic and cannot be read from source.
+//! The constants and both linear layers are transcribed from a cited Solidity implementation
+//! and pinned against Barretenberg's own permutation by the vectors in `tests/`, because the
+//! canonical constants live in a WASM blob and a compiler intrinsic, not in readable source.
 
 #![deny(missing_docs)]
 
@@ -238,9 +234,8 @@ mod tests {
     use ark_bn254::Fr;
     use ark_ff::PrimeField;
 
-    /// The generator's first pass used a formatter that drops leading zeros; 35 of these lost a
-    /// digit and the decoder read them left-aligned, producing a well-formed permutation with
-    /// the wrong output. The KAT caught it, but only after the fact - this pins the shape.
+    /// A constant that loses its leading zeros still permutes, but to the wrong output if
+    /// it is ever decoded left-aligned, so every entry is pinned at full width.
     #[test]
     fn every_constant_is_a_full_width_field_element() {
         for (i, hex) in constants::ROUND_CONSTANTS

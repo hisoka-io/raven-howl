@@ -1,6 +1,5 @@
-# Detached workspace: `--workspace` from the repository root does not reach it, so every cargo
-# command here needs `--manifest-path`. Mirrors adapters/railgun for the same reason - an
-# adaptor's dependency graph must not widen the framework's.
+# A standalone workspace, so its dependency graph never widens Raven's. From a Raven checkout,
+# pass `--manifest-path adapters/howl/Cargo.toml`.
 [workspace]
 resolver = "2"
 members = ["poseidon2", "record"]
@@ -11,7 +10,7 @@ edition = "2021"
 rust-version = "1.89"
 authors = ["The Raven Authors"]
 license = "Apache-2.0"
-repository = "https://github.com/hisoka-io/raven"
+repository = "https://github.com/hisoka-io/raven-howl"
 publish = false
 
 [workspace.dependencies]

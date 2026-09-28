@@ -1,5 +1,5 @@
 {
- "source": "darkpool-v2 Poseidon/LibPoseidon2Yul.sol, cites github.com/zemse/poseidon2-evm (MIT)",
+ "source": "Howl LibPoseidon2Yul.sol, which cites github.com/zemse/poseidon2-evm (MIT)",
  "modulus": "0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001",
  "round_constants_in_order": [
   "0x19b849f69450b06848da1d39bd5e4a4302bb86744edc26238b0878e269ed23e5",

@@ -1,14 +1,12 @@
 //! Cross-language parity against Barretenberg, which is what Howl's generator wraps.
 //!
-//! The vectors in `tests/vectors/` were produced by running Aztec's own exported functions. The
-//! generators are retained in `tests/generators/`. The sponge file is
-//! cross-verified against a value the Howl repository COMMITS and calls "the published test
-//! vector", so these pin the same function Howl ships against rather than one with the same
-//! name.
+//! The vectors in `tests/vectors/` were produced by Aztec's own exported functions, using the
+//! generators in `tests/generators/`. The sponge corpus agrees with the value Howl publishes as
+//! its test vector, so it pins the function Howl ships against, not one with the same name.
 //!
-//! Two levels deliberately. The permutation vectors localise a failure to the constants or the
-//! linear layers; the sponge vectors localise it to the padding, the capacity seed or the rate
-//! boundary. A single end-to-end level would say only "wrong".
+//! Two levels: the permutation vectors localise a failure to the constants or the linear
+//! layers; the sponge vectors localise it to the padding, the capacity seed or the rate
+//! boundary.
 
 #![allow(clippy::expect_used, clippy::indexing_slicing, clippy::panic)]
 
@@ -105,17 +103,12 @@ fn hash_of_one_and_two_matches_the_value_howl_publishes() {
     );
 }
 
-/// Corpus integrity, merged from four fixture-inventory checks. These read the JSON
-/// corpora and never call the crate (proven: all four stayed green with `hash`
-/// returning zero and `permutation` the identity), so this is a corpus guard, not
-/// Poseidon2 coverage. It keeps: (1) the sponge corpus covering the rate boundaries
-/// (rate is 3; a boundary bug passes lengths 1-2 and fails at 3, hence 3, 4, 6, 7);
-/// (2) every sponge IV state for lengths 0..=8 present in the permutation corpus, so
-/// the two levels meet at their boundary; (3) the chained vectors, which catch a
-/// constant applied in the wrong round that single-shot vectors can miss; (4) no two
-/// vectors with DIFFERENT inputs sharing an output — keyed by INPUTS, not labels,
-/// because the corpus deliberately carries one input under two names (`seq_3` and
-/// `rate_boundary_3` are both [1,2,3]) and those MUST share an output.
+/// Corpus guard, not Poseidon2 coverage: it reads the JSON corpora and never calls the crate.
+/// It keeps (1) the sponge corpus covering the rate boundaries (rate is 3; a boundary bug
+/// passes lengths 1-2 and fails at 3, hence 3, 4, 6, 7); (2) every sponge IV state for lengths
+/// 0..=8 in the permutation corpus, so the two levels meet; (3) the chained vectors, which
+/// catch a constant applied in the wrong round; (4) no two DIFFERENT inputs sharing an output,
+/// keyed by inputs rather than labels because `seq_3` and `rate_boundary_3` are both [1,2,3].
 #[test]
 fn the_corpus_is_intact() {
     let sponge = vectors("sponge.json");
@@ -232,10 +225,7 @@ fn permuting_the_input_changes_the_digest() {
 
 /// The byte entry point chunks by 32 and the field entry point does not, so they can disagree
 /// at the rate boundary specifically: three elements is 96 bytes and is where the duplex first
-/// fires. Previously only the single-element case was pinned.
-///
-/// `n == 0` is the zero-element case: an empty byte slice is legal and must agree with
-/// `hash(&[])`. Mutation-proved shared kill with the example that used to state it alone.
+/// fires. `n == 0` checks that an empty byte slice agrees with `hash(&[])`.
 #[test]
 fn the_byte_and_field_entry_points_agree_at_every_length_through_two_rate_boundaries() {
     for n in 0..=8usize {
@@ -255,11 +245,9 @@ fn the_byte_and_field_entry_points_agree_at_every_length_through_two_rate_bounda
     }
 }
 
-/// Every length through 48, each distinct from every other - two further rate boundaries past
-/// the 16 that used to be checked separately. The capacity is seeded with the length, so every
-/// one of these must differ. Note this corpus is `1..=n`, whose CONTENT already differs per
-/// length: `length_is_domain_separated` is what isolates the capacity binding, on an all-zeros
-/// corpus, and is NOT subsumed here - mutation-proved.
+/// Every length through 48 yields a distinct digest. This corpus is `1..=n`, whose content
+/// already differs per length; `length_is_domain_separated` isolates the capacity binding on
+/// all-zero inputs.
 #[test]
 fn lengths_zero_through_forty_eight_all_yield_distinct_digests() {
     let mut seen = std::collections::BTreeMap::new();

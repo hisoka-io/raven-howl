@@ -39,7 +39,7 @@ sed -i '1i// /home/example/private-package' "$private_path/tests/generators/gen-
 expect_red private_path 'non-portable absolute home path' "$private_path"
 
 missing=$(new_case missing)
-rm "$missing/tests/generators/SPEC.md"
+rm "$missing/tests/generators/reference.py"
 expect_red missing 'packet inventory mismatch' "$missing"
 
 unlisted=$(new_case unlisted)

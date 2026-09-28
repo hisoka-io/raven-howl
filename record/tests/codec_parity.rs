@@ -106,8 +106,7 @@ fn decode_round_trips_every_vector() {
     }
 }
 
-/// The tail is contract, not slack. This is the check an `occurrence_count` at offset 246
-/// would collide with; see `RecordError::NonZeroPadding`.
+/// The tail is contract, not slack; see `RecordError::NonZeroPadding`.
 #[test]
 fn a_non_zero_tail_is_refused_at_every_pad_byte() {
     let base = unhex(vectors()["vectors"][0]["cell"].as_str().expect("cell"));
@@ -164,10 +163,8 @@ fn a_non_canonical_field_is_refused_rather_than_reduced() {
     );
 }
 
-/// Fixture-coverage guard, not codec coverage: it reads `record.json` and never calls
-/// `decode` (proven: it stays green with the codec gutted). What it protects is
-/// `decode_round_trips_every_vector`'s claim to cover both kinds — a regenerated
-/// fixture that dropped one kind would silently narrow that test without this check.
+/// Fixture guard, not codec coverage: a regenerated `record.json` that dropped one record kind
+/// would silently narrow `decode_round_trips_every_vector`.
 #[test]
 fn the_fixture_covers_both_record_kinds() {
     let doc = vectors();

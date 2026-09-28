@@ -6,10 +6,9 @@
 //! each, which is `R_F * t + R_P = 8 * 4 + 56`, and exactly four appear 56 times each, once
 //! per internal round, which is the diagonal.
 //!
-//! Every entry is zero-padded to 64 hex digits. That is load-bearing, not cosmetic: the
-//! generator's first pass used a formatter that drops leading zeros, 35 of these lost a digit,
-//! and the decoder read them left-aligned. `every_constant_is_a_full_width_field_element`
-//! pins the width so the same mistake cannot recur silently.
+//! Every entry is zero-padded to 64 hex digits: a short entry read left-aligned yields a
+//! well-formed permutation with the wrong output. `every_constant_is_a_full_width_field_element`
+//! pins the width.
 
 /// Applied in order: 4 external rounds of `t` each, then 56 internal of one each, then 4 external.
 pub(crate) const ROUND_CONSTANTS: [&str; 88] = [

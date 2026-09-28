@@ -11,7 +11,7 @@
 //!
 //! **The trailing ten bytes are part of the contract and must be zero.** Howl's decoder
 //! refuses a non-zero tail, on the grounds that it means the sender used a layout this build
-//! cannot read. See [`RecordError::NonZeroPadding`], and the note on `occurrence_count` there.
+//! cannot read. See [`RecordError::NonZeroPadding`].
 
 #![deny(missing_docs)]
 
@@ -96,10 +96,6 @@ pub enum RecordError {
     /// Deliberately fatal rather than ignored. The pad is where a later layout would put new
     /// fields, so a non-zero tail means the sender is speaking a dialect this build cannot
     /// read, and decoding the prefix anyway would return a record that looks complete.
-    ///
-    /// This is what an `occurrence_count` would collide with: the payload is full at 246
-    /// bytes, so a per-tag count has no home but the pad, and where it lands is an unsettled
-    /// wire decision. This crate carries no such field.
     #[error("cell padding is non-zero at byte {index}")]
     NonZeroPadding {
         /// First offending offset.

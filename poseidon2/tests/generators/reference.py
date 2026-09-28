@@ -1,6 +1,6 @@
 """Poseidon2-BN254 reference, transcribed from the Yul and checked against Barretenberg.
 
-Structure read from darkpool-v2 .../Poseidon/LibPoseidon2Yul.sol, which cites
+Structure read from Howl's LibPoseidon2Yul.sol, which cites
 github.com/zemse/poseidon2-evm (MIT). Constants extracted from that file by usage frequency:
 88 appear exactly once (round constants, in application order) and 4 appear 56 times each
 (the internal diagonal, one use per partial round).
