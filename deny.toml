@@ -1,0 +1,7 @@
+[advisories]
+unmaintained = "all"
+unsound = "all"
+yanked = "deny"
+ignore = [
+  { id = "RUSTSEC-2024-0436", reason = "paste unmaintained, no known vulnerability, proc-macro only. Arrives under ark-ff; no direct dependency to drop. Retire when ark-ff stops pulling it." },
+]
