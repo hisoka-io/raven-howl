@@ -14,6 +14,7 @@ mod constants;
 
 use ark_bn254::Fr;
 use ark_ff::{AdditiveGroup, BigInteger, PrimeField};
+use std::sync::OnceLock;
 
 /// Width of the permutation state.
 pub const STATE_WIDTH: usize = 4;
@@ -73,20 +74,27 @@ const fn hex_val(c: u8) -> u8 {
     }
 }
 
-fn round_constants() -> Vec<Fr> {
-    constants::ROUND_CONSTANTS
-        .iter()
-        .copied()
-        .map(constant)
-        .collect()
+// Decoded once: parsing the tables on every call cost more than the permutation itself.
+fn round_constants() -> &'static [Fr] {
+    static TABLE: OnceLock<Vec<Fr>> = OnceLock::new();
+    TABLE.get_or_init(|| {
+        constants::ROUND_CONSTANTS
+            .iter()
+            .copied()
+            .map(constant)
+            .collect()
+    })
 }
 
 fn internal_diagonal() -> [Fr; STATE_WIDTH] {
-    let mut out = [Fr::from(0u64); STATE_WIDTH];
-    for (slot, hex) in out.iter_mut().zip(constants::INTERNAL_DIAGONAL) {
-        *slot = constant(hex);
-    }
-    out
+    static TABLE: OnceLock<[Fr; STATE_WIDTH]> = OnceLock::new();
+    *TABLE.get_or_init(|| {
+        let mut out = [Fr::from(0u64); STATE_WIDTH];
+        for (slot, hex) in out.iter_mut().zip(constants::INTERNAL_DIAGONAL) {
+            *slot = constant(hex);
+        }
+        out
+    })
 }
 
 fn sbox(x: Fr) -> Fr {
@@ -124,7 +132,7 @@ pub fn permutation(state: [Fr; STATE_WIDTH]) -> [Fr; STATE_WIDTH] {
 
     let mut k = 0usize;
     for _ in 0..FULL_ROUNDS / 2 {
-        full_round(&mut s, &rc, &mut k);
+        full_round(&mut s, rc, &mut k);
     }
     for _ in 0..PARTIAL_ROUNDS {
         s[0] += rc.get(k).copied().unwrap_or_else(Fr::default);
@@ -136,7 +144,7 @@ pub fn permutation(state: [Fr; STATE_WIDTH]) -> [Fr; STATE_WIDTH] {
         }
     }
     for _ in 0..FULL_ROUNDS / 2 {
-        full_round(&mut s, &rc, &mut k);
+        full_round(&mut s, rc, &mut k);
     }
     s
 }

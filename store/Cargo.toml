@@ -1,0 +1,31 @@
+[package]
+name = "howl-store"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+description = "The positional Howl discovery table: one 256-byte cell per tree leaf, sealed shard by shard, with the tag index and tree leaves beside it."
+
+[lints]
+workspace = true
+
+[dependencies]
+howl-indexer = { path = "../indexer" }
+howl-prefix-feed = { path = "../prefix-feed" }
+howl-record = { path = "../record" }
+raven-storage = { workspace = true }
+bincode = { workspace = true }
+serde = { workspace = true }
+sha2 = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+howl-poseidon2 = { path = "../poseidon2" }
+raven-inspire = { workspace = true, features = ["mod-switch-response"] }
+ark-bn254 = { workspace = true }
+ark-ff = { workspace = true }
+serde_json = { workspace = true }
+tempfile = { workspace = true }

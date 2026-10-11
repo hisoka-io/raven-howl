@@ -1,0 +1,23 @@
+[package]
+name = "howl-prefix-feed"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+description = "The public six-byte-per-leaf tag index: served in resumable segments, scanned by a wallet for its own positions."
+
+[lints]
+workspace = true
+
+[dependencies]
+thiserror = { workspace = true }
+
+[dev-dependencies]
+howl-indexer = { path = "../indexer" }
+howl-poseidon2 = { path = "../poseidon2" }
+ark-bn254 = { workspace = true }
+ark-ff = { workspace = true }
+serde_json = { workspace = true }

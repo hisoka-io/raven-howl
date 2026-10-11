@@ -8,22 +8,35 @@ includes it as a git submodule at `adapters/howl`.
   Aztec's `poseidon2Hash`. It is not Poseidon-BN254.
 - `howl-record` (`record/`): the `howl-note-v1` discovery record, 246 payload bytes inside a
   256-byte PIR cell, with a zero-padded tail that decoders refuse when non-zero.
+- `howl-indexer` (`indexer/`): turns the pool's logs into the ordered leaf stream. Every tree
+  insertion is paired with the event that describes it and checked against the root the pool
+  reports, so the stream is the tree, leaf for leaf. It reads blocks a configured depth below
+  the head.
+- `howl-prefix-feed` (`prefix-feed/`): the public tag index, six bytes per leaf in tree order,
+  cut into resumable segments, with the wallet-side index that finds a wallet's positions
+  from the tags it derives. A full segment is the same bytes and cursors on every read.
+- `howl-store` (`store/`): the durable positional table on Raven's storage crate. One
+  256-byte cell per leaf in shards of 2,048 rows, each sealed once when it fills, with the
+  tag index and the tree leaves in blocks of 1,024 beside it. Its log is retired at 1 MiB,
+  so a restart replays a bounded log on a busy chain and on a quiet one.
 
-Status: pre-release (`0.1.0-alpha.0`), not published to crates.io. Both crates are pinned by
+Status: pre-release (`0.1.0-alpha.0`), not published to crates.io. Every crate is pinned by
 test vectors produced by the counterpart implementations.
 
 ## Build and test
 
-The workspace has no path dependencies and builds on its own:
+`howl-store` builds on Raven's `raven-storage`, and its tests on `raven-inspire`. Both are
+resolved by path from the Raven checkout this repository sits in, so build from there:
 
 ```bash
-git clone https://github.com/hisoka-io/raven-howl.git
-cd raven-howl
-cargo fmt --all -- --check
-cargo clippy --all-targets -- -D warnings
-cargo test --all-targets
-cargo test --doc
+git clone --recurse-submodules https://github.com/hisoka-io/raven.git
+cd raven
+cargo clippy --manifest-path adapters/howl/Cargo.toml --all-targets -- -D warnings
+cargo test --manifest-path adapters/howl/Cargo.toml --all-targets
+cargo test --manifest-path adapters/howl/Cargo.toml --doc
 ```
+
+The other four crates depend on crates.io alone.
 
 Minimum Rust version: 1.89.
 
@@ -42,6 +55,25 @@ poseidon2/check-provenance-selftest.sh
 To regenerate against Aztec itself, install `@aztec/foundation@2.1.11`, point
 `AZTEC_FOUNDATION_ROOT` at that package's root, and run `gen-kats.mjs` or `gen-perm-kats.mjs`
 with Node. The generators refuse a missing or different version of the package.
+
+## Chain fixture
+
+`indexer/tests/vectors/chain.json` is a chain of pool logs with the answers Howl's own code
+gives for it: logs ABI-encoded from the compiled pool, tags from Howl's key derivation, cells
+from its record encoder, roots from its tree. The indexer, feed and store tests all replay it.
+Each leaf also carries `prefix`, the row the public tag index holds for it (`prefix_rule`
+states the derivation), so an implementation in another language can check its index against
+the same file.
+`indexer/tests/generators/SHA256SUMS` pins the fixture and its generator.
+
+To regenerate, point `HOWL_ROOT` at a built Howl checkout and run the generator with Node.
+It names the Howl commit it expects and refuses another:
+
+```bash
+HOWL_ROOT=/path/to/howl node indexer/tests/generators/gen-chain-fixture.mjs \
+  > indexer/tests/vectors/chain.json
+(cd indexer/tests/generators && sha256sum -c SHA256SUMS)
+```
 
 ## License
 

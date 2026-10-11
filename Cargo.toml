@@ -2,7 +2,7 @@
 # pass `--manifest-path adapters/howl/Cargo.toml`.
 [workspace]
 resolver = "2"
-members = ["poseidon2", "record"]
+members = ["poseidon2", "record", "indexer", "prefix-feed", "store"]
 
 [workspace.package]
 version = "0.1.0-alpha.0"
@@ -17,7 +17,16 @@ publish = false
 ark-bn254 = "0.5"
 ark-ff = "0.5"
 thiserror = "2"
+serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+bincode = "1"
+sha2 = { version = "0.10", default-features = false }
+sha3 = { version = "0.10", default-features = false }
+tempfile = "3"
+# Raven's durability primitives and PIR engine, resolved from the Raven checkout this
+# repository sits in at `adapters/howl`.
+raven-storage = { path = "../../crates/storage" }
+raven-inspire = { path = "../../crates/inspire" }
 
 [workspace.lints.rust]
 unsafe_code = "deny"
@@ -30,3 +39,7 @@ panic = "deny"
 todo = "deny"
 unimplemented = "deny"
 indexing_slicing = "deny"
+
+# Hashing, field arithmetic and the PIR engine under test are impractical at opt-level 0.
+[profile.dev.package."*"]
+opt-level = 2
