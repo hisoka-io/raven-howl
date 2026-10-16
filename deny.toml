@@ -3,6 +3,5 @@ unmaintained = "all"
 unsound = "all"
 yanked = "deny"
 ignore = [
-  { id = "RUSTSEC-2025-0141", reason = "bincode 1.3.3 unmaintained, not vulnerable. Raven's storage crate frames its log and snapshots with it, and the store here writes through that crate. Retire when Raven's storage format moves off it." },
   { id = "RUSTSEC-2024-0436", reason = "paste unmaintained, no known vulnerability, proc-macro only. Arrives under ark-ff; no direct dependency to drop. Retire when ark-ff stops pulling it." },
 ]

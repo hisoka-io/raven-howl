@@ -15,28 +15,23 @@ includes it as a git submodule at `adapters/howl`.
 - `howl-prefix-feed` (`prefix-feed/`): the public tag index, six bytes per leaf in tree order,
   cut into resumable segments, with the wallet-side index that finds a wallet's positions
   from the tags it derives. A full segment is the same bytes and cursors on every read.
-- `howl-store` (`store/`): the durable positional table on Raven's storage crate. One
-  256-byte cell per leaf in shards of 2,048 rows, each sealed once when it fills, with the
-  tag index and the tree leaves in blocks of 1,024 beside it. Its log is retired at 1 MiB,
-  so a restart replays a bounded log on a busy chain and on a quiet one.
+
+The durable table these crates feed, `howl-store`, is built on Raven's storage crate and lives
+in the Raven repository at `adapters/howl-node`, where it is tested against this repository as
+a submodule.
 
 Status: pre-release (`0.1.0-alpha.0`), not published to crates.io. Every crate is pinned by
 test vectors produced by the counterpart implementations.
 
 ## Build and test
 
-`howl-store` builds on Raven's `raven-storage`, and its tests on `raven-inspire`. Both are
-resolved by path from the Raven checkout this repository sits in, so build from there:
+Every crate depends on crates.io alone, so a plain clone builds and tests:
 
 ```bash
-git clone --recurse-submodules https://github.com/hisoka-io/raven.git
-cd raven
-cargo clippy --manifest-path adapters/howl/Cargo.toml --all-targets -- -D warnings
-cargo test --manifest-path adapters/howl/Cargo.toml --all-targets
-cargo test --manifest-path adapters/howl/Cargo.toml --doc
+cargo clippy --all-targets --locked -- -D warnings
+cargo test --all-targets --locked
+cargo test --doc --locked
 ```
-
-The other four crates depend on crates.io alone.
 
 Minimum Rust version: 1.89.
 
@@ -60,7 +55,7 @@ with Node. The generators refuse a missing or different version of the package.
 
 `indexer/tests/vectors/chain.json` is a chain of pool logs with the answers Howl's own code
 gives for it: logs ABI-encoded from the compiled pool, tags from Howl's key derivation, cells
-from its record encoder, roots from its tree. The indexer, feed and store tests all replay it.
+from its record encoder, roots from its tree. The indexer and feed tests here, and the store's in Raven, all replay it.
 Each leaf also carries `prefix`, the row the public tag index holds for it (`prefix_rule`
 states the derivation), so an implementation in another language can check its index against
 the same file.

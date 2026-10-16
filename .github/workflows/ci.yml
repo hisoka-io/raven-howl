@@ -24,6 +24,9 @@ jobs:
         run: poseidon2/check-provenance.sh
       - name: Poseidon2 provenance red-proof
         run: poseidon2/check-provenance-selftest.sh
+      - name: verify the chain fixture against its pinned hashes
+        working-directory: indexer/tests/generators
+        run: sha256sum --check --strict SHA256SUMS
       - name: cargo fmt
         run: cargo fmt --all -- --check
       - name: cargo clippy

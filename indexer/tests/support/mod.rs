@@ -75,13 +75,10 @@ fn keys(list: &serde_json::Value) -> Vec<FixtureKey> {
 
 impl Fixture {
     pub fn load() -> Self {
-        let path = concat!(
-            env!("CARGO_MANIFEST_DIR"),
-            "/../indexer/tests/vectors/chain.json"
-        );
+        // Relative to this file, so a crate in another workspace that mounts this module reads
+        // the same fixture.
         let doc: serde_json::Value =
-            serde_json::from_str(&std::fs::read_to_string(path).expect("fixture file"))
-                .expect("fixture parses");
+            serde_json::from_str(include_str!("../vectors/chain.json")).expect("fixture parses");
 
         let mut logs = Vec::new();
         for block in doc["blocks"].as_array().expect("blocks") {
