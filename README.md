@@ -70,6 +70,19 @@ HOWL_ROOT=/path/to/howl node indexer/tests/generators/gen-chain-fixture.mjs \
 (cd indexer/tests/generators && sha256sum -c SHA256SUMS)
 ```
 
+## Record vectors
+
+`record/tests/vectors/record.json` is the output of Howl's own record codec
+(`packages/wallets/src/discovery/codec.ts`): cells it encodes, each of which its decoder reads
+back, and cells its decoder refuses. The file names the Howl commit it came from. To regenerate,
+point `HOWL_ROOT` at a Howl checkout with `pnpm install` done for `packages/wallets`:
+
+```bash
+HOWL_ROOT=/path/to/howl node record/tests/vectors/generate.mjs > record/tests/vectors/record.json
+```
+
+The inputs come from a fixed seed, so the same Howl commit gives the same file.
+
 ## License
 
 [Apache-2.0](./LICENSE)

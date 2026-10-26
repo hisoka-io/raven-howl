@@ -1,6 +1,7 @@
 //! Byte parity against Howl's committed codec.
 //!
-//! The vectors were produced by that codec's own offsets and field encoding. This is frozen
+//! `tests/vectors/record.json` is the output of `tests/vectors/generate.mjs`, which runs Howl's
+//! own encoder and decoder; the file names the Howl revision it came from. This is frozen
 //! wire: an implementation on the other side of the network decodes by these offsets, so a
 //! disagreement here is a note the recipient cannot read.
 
@@ -101,6 +102,23 @@ fn decode_round_trips_every_vector() {
             got,
             record_of(v),
             "round trip on {}",
+            v["label"].as_str().unwrap_or("?")
+        );
+    }
+}
+
+/// Every cell Howl's decoder refuses is refused here too, so neither side reads a cell the
+/// other would drop.
+#[test]
+fn every_cell_howls_codec_refuses_is_refused() {
+    let doc = vectors();
+    let refused = doc["refused"].as_array().expect("refused");
+    assert!(!refused.is_empty(), "the fixture lists no refused cells");
+    for v in refused {
+        let cell = unhex(v["cell"].as_str().expect("cell"));
+        assert!(
+            decode(&cell).is_err(),
+            "accepted a cell Howl refuses: {}",
             v["label"].as_str().unwrap_or("?")
         );
     }

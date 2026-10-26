@@ -160,6 +160,38 @@ fn a_replay_is_the_same_table_however_the_logs_are_split() {
     }
 }
 
+/// The pool writes `RootSaved` right before every `LeafInserted`. A stream that carries it, as
+/// an unfiltered read of the pool's address does, indexes to the same table.
+#[test]
+fn the_root_saved_log_before_every_insert_changes_nothing() {
+    let fixture = Fixture::load();
+    let whole = replay_once(&fixture);
+    let root_saved: [u8; 32] = Keccak256::digest(b"RootSaved(bytes32)").into();
+    let mut logs = Vec::new();
+    for log in &fixture.logs {
+        let mut log = log.clone();
+        log.log_index = log.log_index * 2 + 1;
+        if is(&log, TOPIC_LEAF_INSERTED, fixture.pool) {
+            let mut new_root = [0u8; 32];
+            new_root.copy_from_slice(&log.data[32..64]);
+            logs.push(RawLog {
+                log_index: log.log_index - 1,
+                topics: vec![root_saved, new_root],
+                data: Vec::new(),
+                ..log.clone()
+            });
+        }
+        logs.push(log);
+    }
+    assert!(logs.len() > fixture.logs.len(), "no RootSaved was added");
+    let batch = Indexer::new(fixture.config(0))
+        .ingest(fixture.head, &logs, Some(fixture.leaf_count))
+        .expect("the stream with RootSaved indexes");
+    assert_eq!(batch.leaves, whole.leaves);
+    assert_eq!(batch.checkpoint.root, whole.checkpoint.root);
+    assert_eq!(batch.checkpoint.leaf_count, whole.checkpoint.leaf_count);
+}
+
 #[test]
 fn only_blocks_below_the_finality_line_are_read() {
     let fixture = Fixture::load();

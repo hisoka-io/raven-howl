@@ -1,10 +1,12 @@
 //! Turns Howl pool logs into the ordered leaf stream a discovery server stores.
 //!
-//! Every tree insertion on chain is two pool logs: `LeafInserted`, carrying the position, the
-//! leaf and the new root, then the event that says what the leaf is - `GenesisSeeded` for
-//! leaf 0, `NewNote` or `NewPrivateMemo` for every note. [`Indexer::ingest`] pairs them in
-//! `(block, logIndex)` order and yields one [`Leaf`] per position: the 256-byte discovery
-//! cell, the discovery tag, and the tree leaf.
+//! Every tree insertion on chain is three pool logs, in this order: `RootSaved` and
+//! `LeafInserted` from the tree library, then the event that says what the leaf is -
+//! `GenesisSeeded` for leaf 0, `NewNote` or `NewPrivateMemo` for every note. `LeafInserted`
+//! carries the position, the leaf and the new root, so `RootSaved` adds nothing here and any
+//! log of a topic this crate does not decode is skipped. [`Indexer::ingest`] pairs
+//! `LeafInserted` with the describing event in `(block, logIndex)` order and yields one
+//! [`Leaf`] per position: the 256-byte discovery cell, the discovery tag, and the tree leaf.
 //!
 //! The pairing is what makes the stream complete. A leaf whose describing event this build
 //! cannot read stops the indexer, and so does a root that differs from the one recomputed
